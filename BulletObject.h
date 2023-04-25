@@ -13,7 +13,9 @@ public:
 	enum BulletDir
 	{
 		DIR_RIGHT = 20,
-		DIR_LEFT = 21,
+		DIR_LEFT,
+		DIR_LEFT_XY,
+		DIR_RIGHT_XY
 	};
 
 	enum BulletType

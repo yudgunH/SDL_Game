@@ -342,3 +342,217 @@ SDL_Rect ThreatsObject::GetRectFrame()
 
 	return rect;
 }
+
+
+////////////////////////////////////////////////////////////////////
+
+TObject::TObject()
+{
+	width_frame_ = 0;
+	height_frame_ = 0;
+	x_val_ = 0.0;
+	y_val_ = 0.0;
+	x_pos_ = 0.0;
+	y_pos_ = 0.0;
+	frame_ = 0;
+	input_type_.left_ = 0;
+	type_move_ = 0;
+	m_Type = T_BIRD;
+	m_alive = true;
+	m_time_alive = 0;
+	speed_ = 0;
+}
+
+TObject::~TObject()
+{
+
+}
+
+bool TObject::LoadImg(std::string path, SDL_Renderer* screen)
+{
+	bool ret = BaseObject::LoadImg(path, screen);
+	if (ret)
+	{
+		width_frame_ = rect_.w / THREAT_FRAME_NUM;
+		height_frame_ = rect_.h;
+
+		set_clips();
+	}
+	return ret;
+}
+
+void TObject::set_clips()
+{
+	if (width_frame_ > 0 && height_frame_ > 0)
+	{
+		for (int i = 0; i < THREAT_FRAME_NUM; i++)
+		{
+			frame_clip[i].x = i * width_frame_;
+			frame_clip[i].y = 0;
+			frame_clip[i].w = width_frame_;
+			frame_clip[i].h = height_frame_;
+		}
+
+	}
+}
+
+void TObject::Show(SDL_Renderer* des)
+{
+	if (m_alive == false)
+		return;
+
+	rect_.x = x_pos_ - map_x_;
+	rect_.y = y_pos_ - map_y_;
+	frame_++;
+	if (frame_ > 8)
+	{
+		frame_ = 0;
+	}
+
+	SDL_Rect* currentClip = &frame_clip[frame_];
+	SDL_Rect rendQuad = { rect_.x, rect_.y, width_frame_, height_frame_ };
+	SDL_RenderCopy(des, p_object_, currentClip, &rendQuad);
+}
+
+void TObject::UpdateMoving(SDL_Renderer* screen)
+{
+	if (m_Type == T_BIRD)
+	{
+
+		if (m_alive == true)  // khi dang song thi moi xu ly di chuyen
+		{
+			if (type_move_ == true) // left-to-right
+			{
+				x_pos_ += (x_val_ + speed_);
+
+				int rX = x_pos_ - map_x_;
+				if (rX > SCREEN_WIDTH) // di chuyen het ve ben mep phai
+				{
+					m_alive = false; // tam thoi coi nhu chet
+					type_move_ = !type_move_;  // dao chieu di chuyen
+					m_time_alive = 100;  // set thoi gian hoi sinh = 100
+
+					input_type_.right_ = 0;
+					input_type_.left_ = 1;
+					LoadImg("img//threat_left.png", screen);
+				}
+			}
+			else
+			{
+				x_pos_ -= (x_val_ + speed_);
+
+				// rx la toa do so voi man hinh
+				int rX = x_pos_ - map_x_;
+
+				if (rX + width_frame_ < 0) // sau khi di chuyen het mep ben trai
+				{
+					// dao chieu di chuyen
+					m_alive = false;
+					type_move_ = !type_move_;
+					m_time_alive = 100;
+					input_type_.right_ = 1;
+					input_type_.left_ = 0;
+					LoadImg("img//threat_right.png", screen);
+				}
+			}
+		}
+		else
+		{
+			// neu dang chet, thi bat dau - thoi gian hoi sinh
+			m_time_alive--;
+
+			// khi nao m_time_alive = 0, nghia la thoi gian cho hoi sinh da het
+			if (m_time_alive == 0)
+			{
+				// bat dau hoi sinh cho con chim
+				m_alive = true;
+				speed_ += 2;
+				if (speed_ > MAX_SPEED)
+				{
+					speed_ = MAX_SPEED;
+				}
+			}
+		}
+	}
+}
+
+void TObject::InitBullet(SDL_Renderer* screen, int bl_type)
+{
+	BulletObject* pBul = new BulletObject();
+	pBul->set_bullet_type(BulletObject::LASER_BULLET);
+
+	bool ret = pBul->LoadImgBullet(screen);
+	if (ret)
+	{
+		pBul->set_is_move(true);
+		if (bl_type == 0) // left-to_right 
+		{
+			pBul->set_bullet_dir(BulletObject::DIR_LEFT_XY);
+		}
+		else
+		{
+			pBul->set_bullet_dir(BulletObject::DIR_RIGHT_XY);
+		}
+
+		int xb = x_pos_ - map_x_;
+		int yb = y_pos_ - map_y_;
+
+		pBul->SetRect(xb + 10, yb + 10);
+		pBul->set_x_val(8);
+		pBul->set_y_val(8);
+		bullet_list_.push_back(pBul);
+	}
+}
+
+void TObject::MakeBullet(SDL_Renderer* screen, const int& x_limit, const int& y_limit)
+{
+	if (m_Type == T_BOSS)
+	{
+		for (int i = 0; i < bullet_list_.size(); i++)
+		{
+			BulletObject* p_bullet = bullet_list_.at(i);
+			if (p_bullet != NULL)
+			{
+				if (p_bullet->get_is_move())
+				{
+					p_bullet->HandleMove(x_limit, y_limit);
+					p_bullet->Render(screen);
+				}
+				else
+				{
+					p_bullet->set_is_move(true);
+					int xb = x_pos_ - map_x_;
+					int yb = y_pos_ - map_y_;
+					p_bullet->SetRect(xb + 10, yb + 10);
+				}
+
+			}
+		}
+	}
+}
+
+void TObject::RemoveBullet(const int& idx)
+{
+	int size = bullet_list_.size();
+	if (size > 0 && idx < size)
+	{
+		BulletObject* p_bullet = bullet_list_.at(idx);
+		bullet_list_.erase(bullet_list_.begin() + idx);
+		if (p_bullet)
+		{
+			delete p_bullet;
+			p_bullet = NULL;
+		}
+	}
+}
+
+SDL_Rect TObject::GetRectFrame()
+{
+	SDL_Rect rect;
+	rect.x = rect_.x;
+	rect.y = rect_.y;
+	rect.w = width_frame_;
+	rect.h = height_frame_;
+
+	return rect;
+}

@@ -31,6 +31,26 @@ void BulletObject::HandleMove(const int& x_border, const int& y_border)
 			is_move_ = false;
 		}
 	}
+	else if (bullet_dir_ == DIR_LEFT_XY)
+	{
+		rect_.x += x_val_;
+		rect_.y += y_val_;
+
+		if (rect_.x > x_border || rect_.y > y_border)
+		{
+			is_move_ = false;
+		}
+	}
+	else if (bullet_dir_ == DIR_RIGHT_XY)
+	{
+		rect_.x -= x_val_;
+		rect_.y += y_val_;
+
+		if (rect_.x < 0 || rect_.y > y_border)
+		{
+			is_move_ = false;
+		}
+	}
 }
 
 bool BulletObject::LoadImgBullet(SDL_Renderer* des)
