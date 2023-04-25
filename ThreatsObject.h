@@ -50,8 +50,8 @@ public:
 
 	void InitBullet(BulletObject* p_bullet, SDL_Renderer* screen);
 	void MakeBullet(SDL_Renderer* screen, const int& x_limit, const int& y_limit);
-
-
+	SDL_Rect GetRectFrame();
+	void RemoveBullet(const int& idx);
 private:
 	SDL_Rect frame_clip[THREAT_FRAME_NUM];
 	float x_pos_;

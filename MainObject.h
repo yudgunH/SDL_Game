@@ -30,13 +30,16 @@ public:
 
 	void DoPlayer(Map& map_data);
 	void UpdateImgPlayer(SDL_Renderer* des);
+	SDL_Rect GetRectFrame();
 	void CheckToMap(Map& map_data);
+
+
 private:
 	float x_val_;
 	float y_val_;
 	
-	float x_pos_;
-	float y_pos_;
+	float x_pos_ ;
+	float y_pos_ ;
 
 	int width_frame_;
 	int height_frame_;

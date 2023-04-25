@@ -3,8 +3,8 @@
 MainObject::MainObject()
 {
 	frame_ = 0;
-	x_pos_ = 100;
-	y_pos_ = 300;
+	x_pos_ = 600;
+	y_pos_ = 500;
 	x_val_ = 0;
 	y_val_ = 0;
 	width_frame_ = 0;
@@ -182,7 +182,7 @@ void MainObject::DoPlayer(Map& map_data)
 	{
 		x_val_ += PLAYER_SPEED;
 	}
-	if (input_type_.jump_ != 0) // Kiểm tra nếu người chơi nhấn phím space
+	if (input_type_.jump_ != 0) // Kiểm tra nếu người chơi nhấn phím lên
 	{
 		if (on_ground == true)
 		{
@@ -202,6 +202,7 @@ void MainObject::CheckToMap(Map& map_data)
 
 	int y1 = 0;
 	int y2 = 0;
+
 
 	//Check horizontal
 	int height_min = height_frame_ < TILE_SIZE ? height_frame_ : TILE_SIZE;
@@ -309,4 +310,15 @@ void MainObject::UpdateImgPlayer(SDL_Renderer* des)
 			LoadImg("img//jump_right.png", des);
 		}
 	}
+}
+
+SDL_Rect MainObject::GetRectFrame()
+{
+	SDL_Rect rect;
+	rect.x = rect_.x;
+	rect.y = rect_.y;
+	rect.w = width_frame_;
+	rect.h = height_frame_;
+
+	return rect;
 }

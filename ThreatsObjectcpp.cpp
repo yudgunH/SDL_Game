@@ -117,8 +117,8 @@ void ThreatsObject::Doplayer(Map& gMap)
 		{
 			x_val_ += THREAT_SPEED;
 		}
-
-		CheckToMap(gMap);
+	
+		CheckToMap(gMap);  
 	}
 	else if (come_back_time_ > 0)
 	{
@@ -273,7 +273,7 @@ void ThreatsObject::InitBullet(BulletObject* p_bullet, SDL_Renderer* screen)
 {
 	if (p_bullet != NULL)
 	{
-		bool ret = p_bullet->set_bullet_type(BulletObject::LASER_BULLET)
+		p_bullet->set_bullet_type(BulletObject::LASER_BULLET);
 		bool ret = p_bullet->LoadImgBullet(screen);
 		if (ret)
 		{
@@ -283,7 +283,6 @@ void ThreatsObject::InitBullet(BulletObject* p_bullet, SDL_Renderer* screen)
 			p_bullet->set_x_val(15);
 			bullet_list_.push_back(p_bullet);
 		}
-		
 	}
 }
 
@@ -316,4 +315,30 @@ void ThreatsObject::MakeBullet(SDL_Renderer* screen, const int& x_limit, const i
 
 		}
 	}
+}
+
+void ThreatsObject::RemoveBullet(const int& idx)
+{
+	int size = bullet_list_.size();
+	if (size > 0 && idx < size)
+	{
+		BulletObject* p_bullet = bullet_list_.at(idx);
+		bullet_list_.erase(bullet_list_.begin() + idx);
+		if (p_bullet)
+		{
+			delete p_bullet;
+			p_bullet = NULL;
+		}
+	}
+}
+
+SDL_Rect ThreatsObject::GetRectFrame()
+{
+	SDL_Rect rect;
+	rect.x = rect_.x;
+	rect.y = rect_.y;
+	rect.w = width_frame_;
+	rect.h = height_frame_;
+
+	return rect;
 }
